@@ -6,12 +6,12 @@ import {
 } from 'jupyter-js-utils';
 
 import {
-  IKernelManager, INotebookSessionManager, IContentsManager,
-  ContentsManager, KernelManager, NotebookSessionManager,
+  IKernelManager, INotebookSessionManager, IContentsManager
+  , KernelManager, NotebookSessionManager,
   getKernelSpecs, IKernelSpecIds, IAjaxSettings
 } from 'jupyter-js-services';
 
-
+import {ContentsManager} from './gdrivecontents';
 /**
  * An implementation of a services provider.
  */
@@ -27,6 +27,7 @@ class JupyterServices {
     this._kernelManager = new KernelManager(options);
     this._sessionManager = new NotebookSessionManager(options);
     this._contentsManager = new ContentsManager(baseUrl, ajaxSettings);
+    console.log('Does it work ?');
   }
 
   /**
