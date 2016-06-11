@@ -8,278 +8,15 @@ import * as utils from 'jupyter-js-utils';
 
 // import * as validate from './validate';
 
-
 /**
  * The url for the contents service.
  */
 var SERVICE_CONTENTS_URL = 'api/contents';
 
-
-/**
- * Options for a contents object.
- */
-export
-interface IContentsOpts {
-  /**
-   * The type of file.
-   *
-   * #### Notes
-   * One of `["directory", "file", "notebook"]`.
-   */
-  type?: string;
-
-  /**
-   * The format of the file `content`.
-   *
-   * #### Notes
-   * One of `['json', text', 'base64']`.
-   *
-   * Only relevant for type: `'file'`.
-   */
-  format?: string;
-
-  /**
-   * The file content, or whether to include the file contents.
-   *
-   * #### Notes
-   * Can either contain the content of a file for upload, or a boolean
-   * indicating whether to include contents in the response.
-   */
-  content?: any;
-
-  /**
-   * The file extension, including a leading `.`.
-   */
-  ext?: string;
-
-  /**
-   * The name of the file.
-   */
-  name?: string;
-}
-
-
-/**
- * Contents model.
- *
- * #### Notes
- * If the model does not contain content, the `content`, `format`, and
- * `mimetype` keys will be `null`.
- */
-export
-interface IContentsModel {
-
-  /**
-   * Name of the contents file.
-   *
-   * #### Notes
-   *  Equivalent to the last part of the `path` field.
-   */
-  name: string;
-
-  /**
-   * The full file path.
-   *
-   * #### Notes
-   * It will *not* start with `/`, and it will be `/`-delimited.
-   */
-  path: string;
-
-  /**
-   * The type of file.
-   *
-   * #### Notes
-   * One of `["directory", "file", "notebook"]`
-   */
-  type: string;
-
-  /**
-   * Whether the requester has permission to edit the file they have requested.
-   */
-  writable?: boolean;
-
-  /**
-   * File creation timestamp.
-   */
-  created?: string;
-
-  /**
-   * Last modified timestamp.
-   */
-  last_modified?: string;
-
-  /**
-   * Specify the mime-type of file contents.
-   *
-   * #### Notes
-   * Only non-`null` when `content` is present and `type` is `"file"`.
-   */
-  mimetype?: string;
-
-  /**
-   * The file content.
-   */
-  content?: any;
-
-  /**
-   * The format of the file `content`.
-   *
-   * #### Notes
-   * One of `{ 'json', text', 'base64' }`
-   *
-   * Only relevant for type: 'file'
-   */
-  format?: string;
-}
-
-
-/**
- * Checkpoint model.
- */
-export
-interface ICheckpointModel {
-  /**
-   * The unique identifier for the checkpoint.
-   */
-  id: string;
-
-  /**
-   * Last modified timestamp.
-   */
-  last_modified: string;
-}
-
-
-/**
- * Interface that a contents manager should implement.
- **/
-export
-interface IContentsManager {
-  /**
-   * Get a file or directory.
-   *
-   * @param path: Path to the file or directory.
-   *
-   * @param options: The options describing the file.
-   *   Use `options.content = true` to return file contents.
-   *
-   * @returns A promise which resolves with the file content.
-   */
-  get(path: string, options?: IContentsOpts): Promise<IContentsModel>;
-
-  /**
-   * Create a new untitled file or directory in the specified directory path.
-   *
-   * @param path: The directory in which to create the new file/directory.
-   *
-   * @param options: The options describing the new item.
-   *
-   * @returns A promise which resolves with the created file content when the
-   *    file is created.
-   */
-  newUntitled(path: string, options: IContentsOpts): Promise<IContentsModel>;
-
-  /**
-   * Delete a file.
-   *
-   * @param path - The path to the file.
-   *
-   * @returns A promise which resolves when the file is deleted.
-   */
-  delete(path: string): Promise<void>;
-
-  /**
-   * Rename a file or directory.
-   *
-   * @param path - The original file path.
-   *
-   * @param newPath - The new file path.
-   *
-   * @returns A promise which resolves with the new file content model when the
-   *   file is renamed.
-   */
-  rename(path: string, newPath: string): Promise<IContentsModel>;
-
-  /**
-   * Save a file.
-   *
-   * @param path - The desired file path.
-   *
-   * @param model - The file model to save.
-   *
-   * @returns A promise which resolves with the file content model when the
-   *   file is saved.
-   */
-  save(path: string, model: any): Promise<IContentsModel>;
-
-  /**
-   * Copy a file into a given directory.
-   *
-   * @param path - The original file path.
-   *
-   * @param toDir - The destination directory path.
-   *
-   * @returns A promise which resolves with the new content model when the
-   *  file is copied.
-   */
-  copy(path: string, toDir: string): Promise<IContentsModel>;
-
-  /**
-   * List notebooks and directories at a given path.
-   *
-   * @param: path - The path in which to list the contents.
-   *
-   * @returns A promise which resolves with a model with the directory content.
-   */
-  listContents(path: string): Promise<IContentsModel>;
-
-  /**
-   * Create a checkpoint for a file.
-   *
-   * @param path - The path of the file.
-   *
-   * @returns A promise which resolves with the new checkpoint model when the
-   *   checkpoint is created.
-   */
-  createCheckpoint(path: string): Promise<ICheckpointModel>;
-
-  /**
-   * List available checkpoints for a file.
-   *
-   * @param path - The path of the file.
-   *
-   * @returns A promise which resolves with a list of checkpoint models for
-   *    the file.
-   */
-  listCheckpoints(path: string): Promise<ICheckpointModel[]>;
-
-  /**
-   * Restore a file to a known checkpoint state.
-   *
-   * @param path - The path of the file.
-   *
-   * @param checkpointID - The id of the checkpoint to restore.
-   *
-   * @returns A promise which resolves when the checkpoint is restored.
-   */
-  restoreCheckpoint(path: string, checkpointID: string): Promise<void>;
-
-  /**
-   * Delete a checkpoint for a file.
-   *
-   * @param path - The path of the file.
-   *
-   * @param checkpointID - The id of the checkpoint to delete.
-   *
-   * @returns A promise which resolves when the checkpoint is deleted.
-   */
-  deleteCheckpoint(path: string, checkpointID: string): Promise<void>;
-
-  /**
-   * Optional default settings for ajax requests, if applicable.
-   */
-  ajaxSettings?: IAjaxSettings;
-}
+import {
+  IContentsManager, IContentsModel, IContentsOpts,
+  ICheckpointModel, 
+} from 'jupyter-js-services';
 
 
 /**
@@ -289,6 +26,11 @@ interface IContentsManager {
  */
 export
 class ContentsManager implements IContentsManager {
+
+  private _base_url:string;
+  private _config:any;
+  private _last_observed_revision:any;
+
   /**
    * Construct a new contents manager object.
    *
@@ -297,9 +39,26 @@ class ContentsManager implements IContentsManager {
    * @param ajaxSettings - Optional initial ajax settings.
    */
   constructor(baseUrl?: string, ajaxSettings?: IAjaxSettings) {
+    /*
     baseUrl = baseUrl || utils.getBaseUrl();
     if (ajaxSettings) this.ajaxSettings = ajaxSettings;
     this._apiUrl = utils.urlPathJoin(baseUrl, SERVICE_CONTENTS_URL);
+    */
+
+    this._base_url = baseUrl;
+    this._config  = options.common_config;
+    /**
+     * Stores the revision id from the last save or load.  This is used
+     * when checking if a file has been modified by another user.
+     */
+    this._last_observed_revision = {};
+    var that = this;
+    this._config.loaded.then((data) => {
+      gapiutils.config(this._config);
+      gapiutils.gapi_ready.then(driveutils.set_user_info);
+    })
+
+
   }
 
   /**
