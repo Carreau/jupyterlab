@@ -37,12 +37,12 @@ class Builder(object):
             messages = yield self._run_build_check(self.app_dir, self.log)
             status = 'needed' if messages else 'stable'
             if messages:
-                self.log.warn('Build recommended')
-                [self.log.warn(m) for m in messages]
+                self.log.warning('Build recommended')
+                [self.log.warning(m) for m in messages]
             else:
                 self.log.info('Build is up to date')
         except ValueError as e:
-            self.log.warn(
+            self.log.warning(
                 'Could not determine jupyterlab build status without nodejs'
             )
             status = 'stable'
@@ -95,7 +95,7 @@ class Builder(object):
         except Exception as e:
             if self._kill_event.is_set():
                 return
-            self.log.warn('Build failed, running a clean and rebuild')
+            self.log.warning('Build failed, running a clean and rebuild')
             clean(app_dir)
             return build(**kwargs)
 
@@ -114,7 +114,7 @@ class BuildHandler(APIHandler):
     @web.authenticated
     @gen.coroutine
     def delete(self):
-        self.log.warn('Canceling build')
+        self.log.warning('Canceling build')
         try:
             yield self.builder.cancel()
         except Exception as e:
