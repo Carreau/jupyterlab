@@ -7,6 +7,7 @@ import { renameFile } from '@jupyterlab/docmanager';
 import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { nullTranslator } from '@jupyterlab/translation';
 import {
+  addIcon,
   ellipsesIcon,
   homeIcon as preferredIcon,
   folderIcon as rootIcon
@@ -52,6 +53,12 @@ const CONTENTS_MIME = 'application/x-jupyter-icontents';
  */
 const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 
+const BREADCRUMB_INPUT_MODE_CLASS = 'jp-mod-inputMode';
+const BREADCRUMB_ADDER_CLASS = 'jp-BreadCrumbs-adder';
+const BREADCRUMB_INPUT_CLASS = 'jp-BreadCrumbs-input';
+const BREADCRUMB_SUGGESTIONS_CLASS = 'jp-BreadCrumbs-suggestions';
+const BREADCRUMB_SUGGESTION_CLASS = 'jp-BreadCrumbs-suggestion';
+
 /**
  * A class which hosts folder breadcrumbs.
  */
@@ -78,6 +85,29 @@ export class BreadCrumbs extends Widget {
     }
     this.node.appendChild(this._crumbs[Private.Crumb.Home]);
     this._model.refreshed.connect(this.update, this);
+
+    // Create a `+` after the breadcrumb that can be clicked
+    // to show an input filed for the user to type/edit a path they wish
+    const addNode = addIcon.element({
+      className: `${BREADCRUMB_ITEM_CLASS} ${BREADCRUMB_ADDER_CLASS}`,
+      tag: 'span',
+      title: 'Go to path…',
+      stylesheet: 'breadCrumb'
+    });
+
+    this._adderNode = addNode;
+
+    this._inputNode = document.createElement('input');
+    this._inputNode.type = 'text';
+    this._inputNode.className = BREADCRUMB_INPUT_CLASS;
+    this._inputNode.placeholder = 'Type a path…';
+
+    this._suggestionsNode = document.createElement('ul');
+    this._suggestionsNode.className = BREADCRUMB_SUGGESTIONS_CLASS;
+    this._suggestionsNode.style.display = 'none';
+
+    this.node.appendChild(this._inputNode);
+    this.node.appendChild(this._suggestionsNode);
   }
 
   /**
@@ -94,6 +124,15 @@ export class BreadCrumbs extends Widget {
     switch (event.type) {
       case 'click':
         this._evtClick(event as MouseEvent);
+        break;
+      case 'input':
+        this._evtInput();
+        break;
+      case 'keydown':
+        this._evtInputKeydown(event as KeyboardEvent);
+        break;
+      case 'blur':
+        this._evtInputBlur();
         break;
       case 'lm-dragenter':
         this._evtDragEnter(event as Drag.Event);
@@ -157,6 +196,10 @@ export class BreadCrumbs extends Widget {
     node.addEventListener('lm-dragleave', this);
     node.addEventListener('lm-dragover', this);
     node.addEventListener('lm-drop', this);
+    this._adderNode.addEventListener('click', this._enterInputMode);
+    this._inputNode.addEventListener('input', this);
+    this._inputNode.addEventListener('keydown', this);
+    this._inputNode.addEventListener('blur', this);
   }
 
   /**
@@ -170,12 +213,21 @@ export class BreadCrumbs extends Widget {
     node.removeEventListener('lm-dragleave', this);
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
+    this._adderNode.removeEventListener('click', this._enterInputMode);
+    this._inputNode.removeEventListener('input', this);
+    this._inputNode.removeEventListener('keydown', this);
+    this._inputNode.removeEventListener('blur', this);
   }
 
   /**
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
+    // Don't re-render while the user is typing in the input.
+    if (this._inputMode) {
+      return;
+    }
+
     // Update the breadcrumb list.
     const contents = this._model.manager.services.contents;
     const localPath = contents.localPath(this._model.path);
@@ -191,6 +243,13 @@ export class BreadCrumbs extends Widget {
     }
     this._previousState = state;
     Private.updateCrumbs(this._crumbs, state);
+
+    // Re-append persistent nodes: Private.updateCrumbs() removes all children
+    // after the first one on every render, so _inputNode and _suggestionsNode
+    // get detached from the DOM. Re-append them so they are always present.
+    this.node.appendChild(this._inputNode);
+    this.node.appendChild(this._suggestionsNode);
+    this.node.appendChild(this._adderNode);
   }
 
   /**
@@ -199,6 +258,25 @@ export class BreadCrumbs extends Widget {
   private _evtClick(event: MouseEvent): void {
     // Do nothing if it's not a left mouse press.
     if (event.button !== 0) {
+      return;
+    }
+
+    // Handle clicks on suggestion items.
+    if (this._suggestionsNode.contains(event.target as Node)) {
+      let target = event.target as HTMLElement;
+      while (target && target !== this._suggestionsNode) {
+        if (target.classList.contains(BREADCRUMB_SUGGESTION_CLASS)) {
+          const path = target.dataset.path;
+          if (path) {
+            this._commitNavigation(path);
+            this._exitInputMode();
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        target = target.parentElement as HTMLElement;
+      }
       return;
     }
 
@@ -217,6 +295,10 @@ export class BreadCrumbs extends Widget {
         // Stop the event propagation.
         event.preventDefault();
         event.stopPropagation();
+        return;
+      }
+      if (node.classList.contains(BREADCRUMB_ADDER_CLASS)) {
+        // Adder button — handled by its own listener; skip navigation.
         return;
       }
       if (
@@ -388,6 +470,250 @@ export class BreadCrumbs extends Widget {
     return elements;
   }
 
+  /**
+   * Enter path input mode.
+   */
+  private _enterInputMode = (): void => {
+    this._inputMode = true;
+    this.node.classList.add(BREADCRUMB_INPUT_MODE_CLASS);
+
+    // Pre-fill with current path.
+    const contents = this._model.manager.services.contents;
+    const localPath = contents.localPath(this._model.path);
+    const prefill = localPath ? localPath + '/' : '';
+    this._inputNode.value = prefill;
+    this._inputNode.focus();
+    this._inputNode.setSelectionRange(
+      this._inputNode.value.length,
+      this._inputNode.value.length
+    );
+
+    void this._updateSuggestions(prefill);
+  };
+
+  /**
+   * Exit path input mode and restore breadcrumbs.
+   */
+  private _exitInputMode(): void {
+    if (!this._inputMode) {
+      return;
+    }
+    this._inputMode = false;
+    this.node.classList.remove(BREADCRUMB_INPUT_MODE_CLASS);
+
+    this._suggestionsNode.style.display = 'none';
+
+    // Force re-render of crumbs.
+    this._previousState = null;
+    this.update();
+  }
+
+  /**
+   * Update suggestions based on the current input value.
+   */
+  private async _updateSuggestions(inputValue: string): Promise<void> {
+    const lastSlash = inputValue.lastIndexOf('/');
+    const rawDirPart = lastSlash >= 0 ? inputValue.slice(0, lastSlash) : '';
+    // Strip any leading slash typed by the user — contents.get expects paths
+    // without a leading slash (relative to the Jupyter server root).
+    const dirPart = rawDirPart.startsWith('/')
+      ? rawDirPart.slice(1)
+      : rawDirPart;
+    const searchPart =
+      lastSlash >= 0 ? inputValue.slice(lastSlash + 1) : inputValue;
+
+    // Fetch directory listing if the directory changed.
+    if (dirPart !== this._suggestionDirPath) {
+      this._suggestionDirPath = dirPart;
+      this._suggestions = [];
+      try {
+        const result = await this._model.manager.services.contents.get(
+          dirPart || '/',
+          { content: true }
+        );
+        if (result.type === 'directory' && Array.isArray(result.content)) {
+          this._suggestions = (
+            result.content as Array<{ name: string; type: string }>
+          )
+            .filter(item => item.type === 'directory')
+            .map(item => (dirPart ? dirPart + '/' + item.name : item.name));
+        }
+      } catch {
+        this._suggestions = [];
+      }
+    }
+
+    // Filter by search part.
+    const lower = searchPart.toLowerCase();
+    const filtered = this._suggestions.filter(s => {
+      const base = s.slice(s.lastIndexOf('/') + 1);
+      return base.toLowerCase().startsWith(lower);
+    });
+
+    this._activeSuggestionIndex = -1;
+    this._renderSuggestions(filtered);
+  }
+
+  /**
+   * Render the suggestions list.
+   */
+  private _renderSuggestions(suggestions: string[]): void {
+    this._suggestionsNode.innerHTML = '';
+    if (suggestions.length === 0) {
+      this._suggestionsNode.style.display = 'none';
+      return;
+    }
+    for (const path of suggestions) {
+      const li = document.createElement('li');
+      li.className = BREADCRUMB_SUGGESTION_CLASS;
+      li.textContent = path.slice(path.lastIndexOf('/') + 1);
+      li.dataset.path = path;
+      this._suggestionsNode.appendChild(li);
+    }
+    this._suggestionsNode.style.display = '';
+    this._currentFilteredSuggestions = suggestions;
+  }
+
+  /**
+   * Handle input events on the path input.
+   */
+  private _evtInput(): void {
+    void this._updateSuggestions(this._inputNode.value);
+  }
+
+  /**
+   * Handle keydown events on the path input.
+   */
+  private _evtInputKeydown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'Enter':
+        this._commitNavigation(this._inputNode.value);
+        this._exitInputMode();
+        break;
+      case 'Escape':
+        this._exitInputMode();
+        break;
+      case 'Tab':
+        event.preventDefault();
+        this._acceptSuggestion();
+        break;
+      case 'ArrowDown':
+        event.preventDefault();
+        this._navigateSuggestions(1);
+        break;
+      case 'ArrowUp':
+        event.preventDefault();
+        this._navigateSuggestions(-1);
+        break;
+      case '/':
+        setTimeout(() => {
+          void this._updateSuggestions(this._inputNode.value);
+        }, 0);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Handle blur on the path input — exit after a short delay so suggestion
+   * mousedown events are processed first.
+   */
+  private _evtInputBlur(): void {
+    setTimeout(() => {
+      this._exitInputMode();
+    }, 150);
+  }
+
+  /**
+   * Navigate through suggestions with arrow keys.
+   */
+  private _navigateSuggestions(direction: 1 | -1): void {
+    const items = Array.from(this._suggestionsNode.children) as HTMLElement[];
+    if (items.length === 0) {
+      return;
+    }
+
+    // Remove active class from current item.
+    if (this._activeSuggestionIndex >= 0) {
+      items[this._activeSuggestionIndex].classList.remove('jp-mod-active');
+    }
+
+    this._activeSuggestionIndex += direction;
+    if (this._activeSuggestionIndex < 0) {
+      this._activeSuggestionIndex = items.length - 1;
+    } else if (this._activeSuggestionIndex >= items.length) {
+      this._activeSuggestionIndex = 0;
+    }
+
+    const activeItem = items[this._activeSuggestionIndex];
+    activeItem.classList.add('jp-mod-active');
+    activeItem.scrollIntoView({ block: 'nearest' });
+
+    const path = activeItem.dataset.path;
+    if (path) {
+      this._inputNode.value = path + '/';
+    }
+  }
+
+  /**
+   * Accept a suggestion via Tab key.
+   */
+  private _acceptSuggestion(): void {
+    const items = Array.from(this._suggestionsNode.children) as HTMLElement[];
+
+    if (
+      this._activeSuggestionIndex >= 0 &&
+      items[this._activeSuggestionIndex]
+    ) {
+      const path = items[this._activeSuggestionIndex].dataset.path;
+      if (path) {
+        this._inputNode.value = path + '/';
+        void this._updateSuggestions(this._inputNode.value);
+      }
+    } else if (this._currentFilteredSuggestions.length === 1) {
+      this._inputNode.value = this._currentFilteredSuggestions[0] + '/';
+      void this._updateSuggestions(this._inputNode.value);
+    } else if (this._currentFilteredSuggestions.length > 1) {
+      // Complete to common prefix.
+      const names = this._currentFilteredSuggestions.map(s =>
+        s.slice(s.lastIndexOf('/') + 1)
+      );
+      let prefix = names[0];
+      for (const name of names.slice(1)) {
+        let i = 0;
+        while (i < prefix.length && i < name.length && prefix[i] === name[i]) {
+          i++;
+        }
+        prefix = prefix.slice(0, i);
+      }
+      if (prefix) {
+        const lastSlash = this._inputNode.value.lastIndexOf('/');
+        const dirPart =
+          lastSlash >= 0 ? this._inputNode.value.slice(0, lastSlash + 1) : '';
+        this._inputNode.value = dirPart + prefix;
+        void this._updateSuggestions(this._inputNode.value);
+      }
+    }
+  }
+
+  /**
+   * Navigate to the given path.
+   */
+  private _commitNavigation(path: string): void {
+    // Strip trailing slash (except bare root), then ensure a leading slash so
+    // model.cd() → resolvePath() treats this as absolute rather than relative
+    // to the current directory.
+    let normalized =
+      path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path;
+    if (!normalized.startsWith('/')) {
+      normalized = '/' + normalized;
+    }
+    this._model
+      .cd(normalized || '/')
+      .catch(error => showErrorMessage(this._trans.__('Open Error'), error));
+  }
+
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _model: FileBrowserModel;
@@ -397,6 +723,14 @@ export class BreadCrumbs extends Widget {
   private _previousState: Private.ICrumbsState | null = null;
   private _minimumLeftItems: number;
   private _minimumRightItems: number;
+  private _inputMode = false;
+  private _adderNode: HTMLElement;
+  private _inputNode: HTMLInputElement;
+  private _suggestionsNode: HTMLElement;
+  private _suggestions: string[] = [];
+  private _currentFilteredSuggestions: string[] = [];
+  private _activeSuggestionIndex = -1;
+  private _suggestionDirPath = '';
 }
 
 /**
