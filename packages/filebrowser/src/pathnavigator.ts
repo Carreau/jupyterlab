@@ -3,6 +3,8 @@
 
 import { addIcon } from '@jupyterlab/ui-components';
 
+const SUGGESTION_CACHE_TTL_MS = 2000;
+
 const PATHNAVIGATOR_ADDER_CLASS = 'jp-PathNavigator-adder';
 const PATHNAVIGATOR_INPUT_CLASS = 'jp-PathNavigator-input';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
@@ -143,12 +145,20 @@ export class PathNavigator {
     const searchPart =
       lastSlash >= 0 ? inputValue.slice(lastSlash + 1) : inputValue;
 
-    // Only re-fetch when the directory portion of the input changes.
-    if (dirPart !== this._suggestionDirPath) {
+    // Re-fetch when the directory changes or the cache has gone stale.
+    const cacheStale =
+      Date.now() - this._suggestionFetchTime > SUGGESTION_CACHE_TTL_MS;
+    if (dirPart !== this._suggestionDirPath || cacheStale) {
       this._suggestionDirPath = dirPart;
       this._suggestions = [];
+      const fetchId = ++this._fetchId;
       try {
         const items = await this._options.getDirectoryContents(dirPart || '/');
+        // Discard result if a newer fetch has started since this one was issued.
+        if (fetchId !== this._fetchId) {
+          return;
+        }
+        this._suggestionFetchTime = Date.now();
         this._suggestions = items
           .filter(item => item.type === 'directory')
           .map(item => (dirPart ? `${dirPart}/${item.name}` : item.name));
@@ -327,6 +337,8 @@ export class PathNavigator {
   private _currentFilteredSuggestions: string[] = [];
   private _activeSuggestionIndex = -1;
   private _suggestionDirPath = '';
+  private _suggestionFetchTime = 0;
+  private _fetchId = 0;
 }
 
 export namespace PathNavigator {
