@@ -3,11 +3,11 @@
 
 import { addIcon } from '@jupyterlab/ui-components';
 
-const BREADCRUMB_ITEM_CLASS = 'jp-BreadCrumbs-item';
-export const BREADCRUMB_ADDER_CLASS = 'jp-BreadCrumbs-adder';
-const BREADCRUMB_INPUT_CLASS = 'jp-BreadCrumbs-input';
-const BREADCRUMB_SUGGESTIONS_CLASS = 'jp-BreadCrumbs-suggestions';
-const BREADCRUMB_SUGGESTION_CLASS = 'jp-BreadCrumbs-suggestion';
+const PATHNAVIGATOR_ITEM_CLASS = 'jp-BreadCrumbs-item';
+export const PATHNAVIGATOR_ADDER_CLASS = 'jp-BreadCrumbs-adder';
+const PATHNAVIGATOR_INPUT_CLASS = 'jp-BreadCrumbs-input';
+const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-BreadCrumbs-suggestions';
+const PATHNAVIGATOR_SUGGESTION_CLASS = 'jp-BreadCrumbs-suggestion';
 
 /**
  * A component that renders a path input with directory autocomplete for quick
@@ -22,7 +22,7 @@ export class PathNavigator {
     this._options = options;
 
     this._adderNode = addIcon.element({
-      className: `${BREADCRUMB_ITEM_CLASS} ${BREADCRUMB_ADDER_CLASS}`,
+      className: `${PATHNAVIGATOR_ITEM_CLASS} ${PATHNAVIGATOR_ADDER_CLASS}`,
       tag: 'span',
       title: 'Go to path…',
       stylesheet: 'breadCrumb'
@@ -30,33 +30,25 @@ export class PathNavigator {
 
     this._inputNode = document.createElement('input');
     this._inputNode.type = 'text';
-    this._inputNode.className = BREADCRUMB_INPUT_CLASS;
+    this._inputNode.className = PATHNAVIGATOR_INPUT_CLASS;
     this._inputNode.placeholder = 'Type a path…';
 
     this._suggestionsNode = document.createElement('ul');
-    this._suggestionsNode.className = BREADCRUMB_SUGGESTIONS_CLASS;
+    this._suggestionsNode.className = PATHNAVIGATOR_SUGGESTIONS_CLASS;
     this._suggestionsNode.style.display = 'none';
+
+    this._node = document.createElement('span');
+    this._node.appendChild(this._adderNode);
+    this._node.appendChild(this._inputNode);
+    this._node.appendChild(this._suggestionsNode);
   }
 
   /**
-   * The button that triggers path input mode.
+   * The root node containing the adder button, input, and suggestions dropdown.
+   * Append this single node to the DOM.
    */
-  get adderNode(): HTMLElement {
-    return this._adderNode;
-  }
-
-  /**
-   * The text input element.
-   */
-  get inputNode(): HTMLInputElement {
-    return this._inputNode;
-  }
-
-  /**
-   * The suggestions dropdown element.
-   */
-  get suggestionsNode(): HTMLElement {
-    return this._suggestionsNode;
+  get node(): HTMLElement {
+    return this._node;
   }
 
   /**
@@ -186,7 +178,7 @@ export class PathNavigator {
     }
     for (const path of suggestions) {
       const li = document.createElement('li');
-      li.className = BREADCRUMB_SUGGESTION_CLASS;
+      li.className = PATHNAVIGATOR_SUGGESTION_CLASS;
       li.textContent = path.slice(path.lastIndexOf('/') + 1);
       li.dataset.path = path;
       this._suggestionsNode.appendChild(li);
@@ -241,7 +233,7 @@ export class PathNavigator {
     event.preventDefault();
     let target = event.target as HTMLElement;
     while (target && target !== this._suggestionsNode) {
-      if (target.classList.contains(BREADCRUMB_SUGGESTION_CLASS)) {
+      if (target.classList.contains(PATHNAVIGATOR_SUGGESTION_CLASS)) {
         const path = target.dataset.path;
         if (path) {
           this._options.onNavigate(path);
@@ -326,6 +318,7 @@ export class PathNavigator {
   }
 
   private _options: PathNavigator.IOptions;
+  private _node: HTMLElement;
   private _adderNode: HTMLElement;
   private _inputNode: HTMLInputElement;
   private _suggestionsNode: HTMLElement;

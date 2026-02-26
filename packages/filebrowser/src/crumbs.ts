@@ -12,7 +12,7 @@ import {
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
 import {
-  BREADCRUMB_ADDER_CLASS,
+  PATHNAVIGATOR_ADDER_CLASS,
   PathNavigator
 } from './pathnavigator';
 import { JSONExt } from '@lumino/coreutils';
@@ -107,8 +107,7 @@ export class BreadCrumbs extends Widget {
       }
     });
 
-    this.node.appendChild(this._pathNavigator.inputNode);
-    this.node.appendChild(this._pathNavigator.suggestionsNode);
+    this.node.appendChild(this._pathNavigator.node);
   }
 
   /**
@@ -230,12 +229,9 @@ export class BreadCrumbs extends Widget {
     this._previousState = state;
     Private.updateCrumbs(this._crumbs, state);
 
-    // Re-append persistent nodes: Private.updateCrumbs() removes all children
-    // after the first one on every render, so the navigator nodes get detached
-    // from the DOM. Re-append them so they are always present.
-    this.node.appendChild(this._pathNavigator.inputNode);
-    this.node.appendChild(this._pathNavigator.suggestionsNode);
-    this.node.appendChild(this._pathNavigator.adderNode);
+    // Re-append the navigator node: Private.updateCrumbs() removes all children
+    // after the first one on every render, so it gets detached from the DOM.
+    this.node.appendChild(this._pathNavigator.node);
   }
 
   /**
@@ -264,7 +260,7 @@ export class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      if (node.classList.contains(BREADCRUMB_ADDER_CLASS)) {
+      if (node.classList.contains(PATHNAVIGATOR_ADDER_CLASS)) {
         // Adder button — handled by PathNavigator; skip navigation.
         return;
       }
