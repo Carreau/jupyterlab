@@ -11,10 +11,7 @@ import {
   homeIcon as preferredIcon,
   folderIcon as rootIcon
 } from '@jupyterlab/ui-components';
-import {
-  PATHNAVIGATOR_ADDER_CLASS,
-  PathNavigator
-} from './pathnavigator';
+import { PathNavigator } from './pathnavigator';
 import { JSONExt } from '@lumino/coreutils';
 import type { Drag } from '@lumino/dragdrop';
 import type { Message } from '@lumino/messaging';
@@ -260,8 +257,8 @@ export class BreadCrumbs extends Widget {
         event.stopPropagation();
         return;
       }
-      if (node.classList.contains(PATHNAVIGATOR_ADDER_CLASS)) {
-        // Adder button — handled by PathNavigator; skip navigation.
+      if (this._pathNavigator.node.contains(node)) {
+        // Inside PathNavigator — handled by PathNavigator; skip navigation.
         return;
       }
       if (

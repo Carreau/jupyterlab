@@ -3,11 +3,10 @@
 
 import { addIcon } from '@jupyterlab/ui-components';
 
-const PATHNAVIGATOR_ITEM_CLASS = 'jp-BreadCrumbs-item';
-export const PATHNAVIGATOR_ADDER_CLASS = 'jp-BreadCrumbs-adder';
-const PATHNAVIGATOR_INPUT_CLASS = 'jp-BreadCrumbs-input';
-const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-BreadCrumbs-suggestions';
-const PATHNAVIGATOR_SUGGESTION_CLASS = 'jp-BreadCrumbs-suggestion';
+const PATHNAVIGATOR_ADDER_CLASS = 'jp-PathNavigator-adder';
+const PATHNAVIGATOR_INPUT_CLASS = 'jp-PathNavigator-input';
+const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
+const PATHNAVIGATOR_SUGGESTION_CLASS = 'jp-PathNavigator-suggestion';
 
 /**
  * A component that renders a path input with directory autocomplete for quick
@@ -22,7 +21,7 @@ export class PathNavigator {
     this._options = options;
 
     this._adderNode = addIcon.element({
-      className: `${PATHNAVIGATOR_ITEM_CLASS} ${PATHNAVIGATOR_ADDER_CLASS}`,
+      className: PATHNAVIGATOR_ADDER_CLASS,
       tag: 'span',
       title: 'Go to path…',
       stylesheet: 'breadCrumb'
@@ -38,6 +37,7 @@ export class PathNavigator {
     this._suggestionsNode.style.display = 'none';
 
     this._node = document.createElement('span');
+    this._node.className = 'jp-PathNavigator';
     this._node.appendChild(this._adderNode);
     this._node.appendChild(this._inputNode);
     this._node.appendChild(this._suggestionsNode);
