@@ -175,7 +175,13 @@ export class PathNavigator {
     });
 
     this._activeSuggestionIndex = -1;
-    this._renderSuggestions(filtered);
+    this._renderSuggestions(
+      filtered.slice().sort((a, b) => {
+        const nameA = a.slice(a.lastIndexOf('/') + 1);
+        const nameB = b.slice(b.lastIndexOf('/') + 1);
+        return nameA.localeCompare(nameB);
+      })
+    );
   }
 
   /**
