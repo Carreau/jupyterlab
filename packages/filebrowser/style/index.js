@@ -12,4 +12,3 @@ import '@jupyterlab/docregistry/style/index.js';
 import '@jupyterlab/docmanager/style/index.js';
 
 import './base.css';
-import './pathnavigator.css';
