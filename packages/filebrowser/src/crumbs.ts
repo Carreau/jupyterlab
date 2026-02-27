@@ -98,7 +98,6 @@ export class BreadCrumbs extends Widget {
       },
       onDeactivate: () => {
         this.node.classList.remove(BREADCRUMB_INPUT_MODE_CLASS);
-        // Force re-render of crumbs.
         this._previousState = null;
         this.update();
       }
@@ -205,7 +204,6 @@ export class BreadCrumbs extends Widget {
    * A handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    // Don't re-render while the user is typing in the input.
     if (this._pathNavigator.isActive) {
       return;
     }

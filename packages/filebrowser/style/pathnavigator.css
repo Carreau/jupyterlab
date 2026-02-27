@@ -3,7 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-PathNavigator-trigger {
+.jp-PathNavigator {
+  position: relative;
+  display: inline-block;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator {
+  display: block;
+  width: 100%;
+}
+
+.jp-PathNavigator > :first-child {
   cursor: pointer;
   opacity: 0.6;
   padding: 0 2px;
@@ -12,11 +22,11 @@
   top: -2px;
 }
 
-.jp-PathNavigator-trigger:hover {
+.jp-PathNavigator > :first-child:hover {
   opacity: 1;
 }
 
-.jp-PathNavigator-input {
+.jp-PathNavigator > input {
   display: none;
   width: 100%;
   box-sizing: border-box;
@@ -28,7 +38,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-PathNavigator-input:focus {
+.jp-PathNavigator > input:focus {
   outline: none;
 }
 
@@ -49,13 +59,26 @@
   box-shadow: var(--jp-elevation-z4);
 }
 
-.jp-PathNavigator-suggestion {
+.jp-PathNavigator-suggestions > li {
   padding: 4px 8px;
   cursor: pointer;
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-PathNavigator-suggestion:hover,
-.jp-PathNavigator-suggestion.jp-mod-active {
+.jp-PathNavigator-suggestions > li:hover,
+.jp-PathNavigator-suggestions > li.jp-mod-active {
   background: var(--jp-layout-color2);
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode {
+  position: relative;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode > *:not(.jp-PathNavigator),
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > :first-child {
+  display: none;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > input {
+  display: block;
 }
