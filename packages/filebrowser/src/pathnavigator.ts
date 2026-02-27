@@ -8,7 +8,6 @@ const SUGGESTION_CACHE_TTL_MS = 2000;
 const PATHNAVIGATOR_TRIGGER_CLASS = 'jp-PathNavigator-trigger';
 const PATHNAVIGATOR_INPUT_CLASS = 'jp-PathNavigator-input';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
-const PATHNAVIGATOR_SUGGESTION_CLASS = 'jp-PathNavigator-suggestion';
 
 /**
  * A component that renders a path input with directory autocomplete for quick
@@ -22,7 +21,7 @@ export class PathNavigator {
   constructor(options: PathNavigator.IOptions) {
     this._options = options;
 
-    this._adderNode = editIcon.element({
+    this._triggerNode = editIcon.element({
       className: PATHNAVIGATOR_TRIGGER_CLASS,
       tag: 'span',
       title: 'Go to path…',
@@ -40,7 +39,7 @@ export class PathNavigator {
 
     this._node = document.createElement('span');
     this._node.className = 'jp-PathNavigator';
-    this._node.appendChild(this._adderNode);
+    this._node.appendChild(this._triggerNode);
     this._node.appendChild(this._inputNode);
     this._node.appendChild(this._suggestionsNode);
   }
@@ -64,7 +63,7 @@ export class PathNavigator {
    * Attach DOM event listeners.
    */
   attach(): void {
-    this._adderNode.addEventListener('click', this._enterInputMode);
+    this._triggerNode.addEventListener('click', this._enterInputMode);
     this._inputNode.addEventListener('input', this);
     this._inputNode.addEventListener('keydown', this);
     this._inputNode.addEventListener('blur', this);
@@ -76,7 +75,7 @@ export class PathNavigator {
    * Remove DOM event listeners.
    */
   detach(): void {
-    this._adderNode.removeEventListener('click', this._enterInputMode);
+    this._triggerNode.removeEventListener('click', this._enterInputMode);
     this._inputNode.removeEventListener('input', this);
     this._inputNode.removeEventListener('keydown', this);
     this._inputNode.removeEventListener('blur', this);
@@ -188,7 +187,6 @@ export class PathNavigator {
     }
     for (const path of suggestions) {
       const li = document.createElement('li');
-      li.className = PATHNAVIGATOR_SUGGESTION_CLASS;
       li.textContent = path.slice(path.lastIndexOf('/') + 1);
       li.dataset.path = path;
       this._suggestionsNode.appendChild(li);
@@ -243,7 +241,7 @@ export class PathNavigator {
     event.preventDefault();
     let target = event.target as HTMLElement;
     while (target && target !== this._suggestionsNode) {
-      if (target.classList.contains(PATHNAVIGATOR_SUGGESTION_CLASS)) {
+      if (target.tagName === 'LI') {
         const path = target.dataset.path;
         if (path) {
           this._options.onNavigate(path);
@@ -329,7 +327,7 @@ export class PathNavigator {
 
   private _options: PathNavigator.IOptions;
   private _node: HTMLElement;
-  private _adderNode: HTMLElement;
+  private _triggerNode: HTMLElement;
   private _inputNode: HTMLInputElement;
   private _suggestionsNode: HTMLElement;
   private _isActive = false;

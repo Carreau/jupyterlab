@@ -132,14 +132,14 @@
   box-shadow: var(--jp-elevation-z4);
 }
 
-.jp-PathNavigator-suggestion {
+.jp-PathNavigator-suggestions > li {
   padding: 4px 8px;
   cursor: pointer;
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-PathNavigator-suggestion:hover,
-.jp-PathNavigator-suggestion.jp-mod-active {
+.jp-PathNavigator-suggestions > li:hover,
+.jp-PathNavigator-suggestions > li.jp-mod-active {
   background: var(--jp-layout-color2);
 }
 
