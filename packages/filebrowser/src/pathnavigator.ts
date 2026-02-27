@@ -5,7 +5,6 @@ import { editIcon } from '@jupyterlab/ui-components';
 
 const SUGGESTION_CACHE_TTL_MS = 2000;
 
-const PATHNAVIGATOR_TRIGGER_CLASS = 'jp-PathNavigator-trigger';
 const PATHNAVIGATOR_INPUT_CLASS = 'jp-PathNavigator-input';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 
@@ -22,7 +21,6 @@ export class PathNavigator {
     this._options = options;
 
     this._triggerNode = editIcon.element({
-      className: PATHNAVIGATOR_TRIGGER_CLASS,
       tag: 'span',
       title: 'Go to path…',
       stylesheet: 'breadCrumb'

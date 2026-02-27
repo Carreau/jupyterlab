@@ -86,7 +86,7 @@
   width: 100%;
 }
 
-.jp-PathNavigator-trigger {
+.jp-PathNavigator > :first-child {
   cursor: pointer;
   opacity: 0.6;
   padding: 0 2px;
@@ -95,7 +95,7 @@
   top: -2px;
 }
 
-.jp-PathNavigator-trigger:hover {
+.jp-PathNavigator > :first-child:hover {
   opacity: 1;
 }
 
@@ -148,7 +148,7 @@
 }
 
 .jp-BreadCrumbs.jp-mod-inputMode > *:not(.jp-PathNavigator),
-.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator-trigger {
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > :first-child {
   display: none;
 }
 
