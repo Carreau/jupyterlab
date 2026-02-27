@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 import { editIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -20,16 +22,17 @@ const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 export class PathNavigator {
   constructor(options: PathNavigator.IOptions) {
     this._options = options;
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
 
     this._triggerNode = editIcon.element({
       tag: 'span',
-      title: 'Go to path…',
+      title: this._trans.__('Go to path…'),
       stylesheet: 'breadCrumb'
     });
 
     this._inputNode = document.createElement('input');
     this._inputNode.type = 'text';
-    this._inputNode.placeholder = 'Type a path…';
+    this._inputNode.placeholder = this._trans.__('Type a path…');
 
     this._suggestionsNode = document.createElement('ul');
     this._suggestionsNode.className = PATHNAVIGATOR_SUGGESTIONS_CLASS;
@@ -324,6 +327,7 @@ export class PathNavigator {
   }
 
   private _options: PathNavigator.IOptions;
+  private _trans: TranslationBundle;
   private _node: HTMLElement;
   private _triggerNode: HTMLElement;
   private _inputNode: HTMLInputElement;
@@ -367,5 +371,10 @@ export namespace PathNavigator {
      * Called when path input mode becomes inactive.
      */
     onDeactivate: () => void;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

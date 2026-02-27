@@ -100,7 +100,8 @@ export class BreadCrumbs extends Widget {
         this.node.classList.remove(BREADCRUMB_INPUT_MODE_CLASS);
         this._previousState = null;
         this.update();
-      }
+      },
+      translator: options.translator
     });
 
     this.node.appendChild(this._pathNavigator.node);
