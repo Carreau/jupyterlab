@@ -78,6 +78,10 @@
 
 .jp-PathNavigator {
   position: relative;
+  display: inline-block;
+}
+
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator {
   display: block;
   width: 100%;
 }
