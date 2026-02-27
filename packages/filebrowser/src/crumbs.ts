@@ -87,7 +87,7 @@ export class BreadCrumbs extends Widget {
       getCurrentPath: () => contents.localPath(this._model.path),
       getDirectoryContents: async path => {
         const result = await contents.get(path, { content: true });
-        if (result.type === 'directory' && Array.isArray(result.content)) {
+        if (result.type === 'directory') {
           return result.content as Array<{ name: string; type: string }>;
         }
         return [];
