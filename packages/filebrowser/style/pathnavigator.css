@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-PathNavigator-adder {
+.jp-PathNavigator-trigger {
   cursor: pointer;
   opacity: 0.6;
   padding: 0 2px;
@@ -12,7 +12,7 @@
   top: -2px;
 }
 
-.jp-PathNavigator-adder:hover {
+.jp-PathNavigator-trigger:hover {
   opacity: 1;
 }
 
