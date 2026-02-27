@@ -5,7 +5,6 @@ import { editIcon } from '@jupyterlab/ui-components';
 
 const SUGGESTION_CACHE_TTL_MS = 2000;
 
-const PATHNAVIGATOR_INPUT_CLASS = 'jp-PathNavigator-input';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 
 /**
@@ -28,7 +27,6 @@ export class PathNavigator {
 
     this._inputNode = document.createElement('input');
     this._inputNode.type = 'text';
-    this._inputNode.className = PATHNAVIGATOR_INPUT_CLASS;
     this._inputNode.placeholder = 'Type a path…';
 
     this._suggestionsNode = document.createElement('ul');

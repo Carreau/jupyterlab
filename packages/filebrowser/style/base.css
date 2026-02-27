@@ -99,7 +99,7 @@
   opacity: 1;
 }
 
-.jp-PathNavigator-input {
+.jp-PathNavigator > input {
   display: none;
   width: 100%;
   box-sizing: border-box;
@@ -111,7 +111,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-PathNavigator-input:focus {
+.jp-PathNavigator > input:focus {
   outline: none;
 }
 
@@ -152,7 +152,7 @@
   display: none;
 }
 
-.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator-input {
+.jp-BreadCrumbs.jp-mod-inputMode .jp-PathNavigator > input {
   display: block;
 }
 
