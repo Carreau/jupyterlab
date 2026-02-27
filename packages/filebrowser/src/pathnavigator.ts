@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { addIcon } from '@jupyterlab/ui-components';
+import { editIcon } from '@jupyterlab/ui-components';
 
 const SUGGESTION_CACHE_TTL_MS = 2000;
 
-const PATHNAVIGATOR_ADDER_CLASS = 'jp-PathNavigator-adder';
+const PATHNAVIGATOR_TRIGGER_CLASS = 'jp-PathNavigator-trigger';
 const PATHNAVIGATOR_INPUT_CLASS = 'jp-PathNavigator-input';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 const PATHNAVIGATOR_SUGGESTION_CLASS = 'jp-PathNavigator-suggestion';
@@ -22,8 +22,8 @@ export class PathNavigator {
   constructor(options: PathNavigator.IOptions) {
     this._options = options;
 
-    this._adderNode = addIcon.element({
-      className: PATHNAVIGATOR_ADDER_CLASS,
+    this._adderNode = editIcon.element({
+      className: PATHNAVIGATOR_TRIGGER_CLASS,
       tag: 'span',
       title: 'Go to path…',
       stylesheet: 'breadCrumb'
