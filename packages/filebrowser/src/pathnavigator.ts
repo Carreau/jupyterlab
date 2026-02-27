@@ -11,6 +11,7 @@ import { editIcon } from '@jupyterlab/ui-components';
  */
 const SUGGESTION_CACHE_TTL_MS = 2000;
 
+const PATHNAVIGATOR_CLASS = 'jp-PathNavigator';
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 
 /**
@@ -39,7 +40,7 @@ export class PathNavigator {
     this._suggestionsNode.style.display = 'none';
 
     this._node = document.createElement('span');
-    this._node.className = 'jp-PathNavigator';
+    this._node.className = PATHNAVIGATOR_CLASS;
     this._node.appendChild(this._triggerNode);
     this._node.appendChild(this._inputNode);
     this._node.appendChild(this._suggestionsNode);
