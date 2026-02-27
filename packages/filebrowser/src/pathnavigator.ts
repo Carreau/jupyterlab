@@ -3,17 +3,19 @@
 
 import { editIcon } from '@jupyterlab/ui-components';
 
+/**
+ * we cache per directory; in case the filesystem change below us, we refresh
+ * every 2000 ms just in case.
+ */
 const SUGGESTION_CACHE_TTL_MS = 2000;
 
 const PATHNAVIGATOR_SUGGESTIONS_CLASS = 'jp-PathNavigator-suggestions';
 
 /**
  * A component that renders a path input with directory autocomplete for quick
- * navigation. It owns an adder button (the trigger), a text input, and a
- * suggestions dropdown.
+ * navigation. It owns a trigger button, a text input, and a suggestions
+ * dropdown.
  *
- * Interaction is communicated outward via callbacks rather than direct
- * coupling to the parent widget.
  */
 export class PathNavigator {
   constructor(options: PathNavigator.IOptions) {
