@@ -144,22 +144,20 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const homeButton = this.page
-      .locator('.jp-FileBrowser .jp-FileBrowser-crumbs span')
-      .first();
+    const homeButton = this.page.locator(
+      '.jp-FileBrowser .jp-BreadCrumbs-home'
+    );
     if (!(await homeButton.count())) {
       return false;
     }
     await homeButton.click();
 
     await this.page.waitForFunction(() => {
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      const items = document.querySelectorAll(
+        '.jp-FileBrowser .jp-BreadCrumbs-item'
       );
-      return (
-        // The home is the root if no preferred dir is defined.
-        spans.length === 2 && spans[0].classList.contains('jp-BreadCrumbs-home')
-      );
+      // At home there are no breadcrumb path items.
+      return items.length === 0;
     });
 
     // wait for DOM rerender
