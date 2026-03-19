@@ -78,16 +78,14 @@ export class FileBrowserHelper {
    */
   async getCurrentDirectory(): Promise<string> {
     return await this.page.evaluate(() => {
-      let directory = '';
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      const items = document.querySelectorAll(
+        '.jp-FileBrowser .jp-BreadCrumbs-container .jp-BreadCrumbs-item'
       );
-      const numSpans = spans.length;
-      if (numSpans > 1) {
-        directory = spans[numSpans - 2].getAttribute('title') ?? '';
+      if (items.length > 0) {
+        const lastItem = items[items.length - 1];
+        return lastItem.getAttribute('data-path') ?? '';
       }
-
-      return directory;
+      return '';
     });
   }
 
