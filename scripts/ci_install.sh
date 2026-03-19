@@ -59,7 +59,7 @@ fi
 # Install and enable the server extension
 # Show a verbose install if the install fails, for debugging
 START=$(date +%s)
-uv pip install -e "${SPEC}" || uv pip install -v -e "${SPEC}"
+uv pip install --system -e "${SPEC}" || uv pip install --system -v -e "${SPEC}"
 step_time $START "uv pip install -e ${SPEC}"
 
 START=$(date +%s)
@@ -72,14 +72,14 @@ if [[ $GROUP != js-services ]]; then
     # ikernel.spec.ts in js-services, which tests subshell compatibility in
     # ipykernel 7.
     START=$(date +%s)
-    uv pip install "ipykernel<7"
+    uv pip install --system "ipykernel<7"
     step_time $START "uv pip install ipykernel"
 fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
     START=$(date +%s)
-    uv pip install build
+    uv pip install --system build
     python -m build .
     step_time $START "wheel build"
 
