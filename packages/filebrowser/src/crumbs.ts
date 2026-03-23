@@ -65,6 +65,11 @@ const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 const BREADCRUMB_CONTAINER_CLASS = 'jp-BreadCrumbs-container';
 
 /**
+ * The class name for the inner wrapper that hugs breadcrumb content.
+ */
+const BREADCRUMB_CONTENT_CLASS = 'jp-BreadCrumbs-content';
+
+/**
  * The class name added to the breadcrumb node when in edit mode.
  */
 const BREADCRUMB_EDIT_MODE_CLASS = 'jp-mod-editMode';
@@ -92,6 +97,9 @@ export class BreadCrumbs extends Widget {
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     this._crumbContainer = document.createElement('span');
     this._crumbContainer.className = BREADCRUMB_CONTAINER_CLASS;
+    this._crumbContent = document.createElement('span');
+    this._crumbContent.className = BREADCRUMB_CONTENT_CLASS;
+    this._crumbContainer.appendChild(this._crumbContent);
 
     this.node.appendChild(this._crumbContainer);
 
@@ -268,7 +276,7 @@ export class BreadCrumbs extends Widget {
     }
     this._previousState = state;
 
-    Private.updateCrumbs(this._crumbContainer, this._crumbs, state);
+    Private.updateCrumbs(this._crumbContent, this._crumbs, state);
   }
 
   /**
@@ -459,7 +467,7 @@ export class BreadCrumbs extends Widget {
    */
   private _getBreadcrumbElements(): HTMLElement[] {
     const elements: HTMLElement[] = [];
-    const children = this._crumbContainer.children;
+    const children = this._crumbContent.children;
     for (let i = 0; i < children.length; i++) {
       const child = children[i] as HTMLElement;
       if (
@@ -492,7 +500,7 @@ export class BreadCrumbs extends Widget {
    * including those currently hidden behind the ellipsis.
    */
   private _measureAllItemWidths(parts: string[]): void {
-    const node = this._crumbContainer;
+    const node = this._crumbContent;
 
     // Measure fixed elements that are already in the DOM
     const home = this._crumbs[Private.Crumb.Home];
@@ -705,6 +713,7 @@ export class BreadCrumbs extends Widget {
   private _isEditMode = false;
   private _lastPath = '';
   private _crumbContainer: HTMLElement;
+  private _crumbContent: HTMLElement;
   private _pathNavigator: PathNavigator;
 }
 

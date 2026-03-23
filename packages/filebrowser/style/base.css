@@ -59,9 +59,7 @@
   cursor: text;
 }
 
-.jp-BreadCrumbs:hover:not(
-    :has(.jp-BreadCrumbs-item:hover, .jp-BreadCrumbs-separator:hover)
-  ) {
+.jp-BreadCrumbs:hover:not(:has(.jp-BreadCrumbs-content:hover)) {
   background: var(--jp-layout-color2);
 }
 
