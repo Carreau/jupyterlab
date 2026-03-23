@@ -65,7 +65,6 @@
 
 /* Invisible fill — stretches to fill remaining width and carries the hover cue */
 .jp-BreadCrumbs-fill {
-  flex: 1;
   min-width: 8px;
   align-self: stretch;
   cursor: text;
