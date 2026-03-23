@@ -60,12 +60,6 @@ const CONTENTS_MIME = 'application/x-jupyter-icontents';
 const DROP_TARGET_CLASS = 'jp-mod-dropTarget';
 
 /**
- * The class name for the invisible fill element that makes the trailing
- * empty space of the breadcrumb bar clickable and hoverable.
- */
-const BREADCRUMB_FILL_CLASS = 'jp-BreadCrumbs-fill';
-
-/**
  * The class name for the container span that holds all breadcrumb items.
  */
 const BREADCRUMB_CONTAINER_CLASS = 'jp-BreadCrumbs-container';
@@ -98,8 +92,6 @@ export class BreadCrumbs extends Widget {
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     this._crumbContainer = document.createElement('span');
     this._crumbContainer.className = BREADCRUMB_CONTAINER_CLASS;
-    this._fillNode = document.createElement('span');
-    this._fillNode.className = BREADCRUMB_FILL_CLASS;
 
     this.node.appendChild(this._crumbContainer);
 
@@ -276,12 +268,7 @@ export class BreadCrumbs extends Widget {
     }
     this._previousState = state;
 
-    Private.updateCrumbs(
-      this._crumbContainer,
-      this._crumbs,
-      state,
-      this._fillNode
-    );
+    Private.updateCrumbs(this._crumbContainer, this._crumbs, state);
   }
 
   /**
@@ -718,7 +705,6 @@ export class BreadCrumbs extends Widget {
   private _isEditMode = false;
   private _lastPath = '';
   private _crumbContainer: HTMLElement;
-  private _fillNode: HTMLElement;
   private _pathNavigator: PathNavigator;
 }
 
@@ -789,13 +775,11 @@ namespace Private {
    * @param container - The container element that holds breadcrumb items.
    * @param breadcrumbs - The reusable breadcrumb elements (Home, Ellipsis, Preferred).
    * @param state - The current breadcrumb state.
-   * @param fillNode - The trailing fill element.
    */
   export function updateCrumbs(
     container: HTMLElement,
     breadcrumbs: ReadonlyArray<HTMLElement>,
-    state: ICrumbsState,
-    fillNode: HTMLElement
+    state: ICrumbsState
   ): void {
     const nodes: Node[] = [];
 
@@ -875,7 +859,6 @@ namespace Private {
       }
     }
 
-    nodes.push(fillNode);
     container.replaceChildren(...nodes);
   }
 

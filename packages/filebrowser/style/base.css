@@ -56,22 +56,18 @@
 .jp-BreadCrumbs {
   flex: 0 0 auto;
   margin: 8px 12px;
-}
-
-/* The container holds breadcrumb icons, separators, items, and the fill */
-.jp-BreadCrumbs-container {
-  min-width: 0;
-}
-
-/* Invisible fill — stretches to fill remaining width and carries the hover cue */
-.jp-BreadCrumbs-fill {
-  min-width: 8px;
-  align-self: stretch;
   cursor: text;
 }
 
-.jp-BreadCrumbs:has(.jp-BreadCrumbs-fill:hover) {
+.jp-BreadCrumbs:hover:not(
+    :has(.jp-BreadCrumbs-item:hover, .jp-BreadCrumbs-separator:hover)
+  ) {
   background: var(--jp-layout-color2);
+}
+
+/* The container holds breadcrumb icons, separators, and items */
+.jp-BreadCrumbs-container {
+  min-width: 0;
 }
 
 .jp-BreadCrumbs.jp-mod-editMode > .jp-BreadCrumbs-container {
