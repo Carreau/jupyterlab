@@ -115,7 +115,7 @@ export class PathNavigator extends Widget {
    * Close the input and notify the parent via the `closed` signal.
    */
   private _close(): void {
-    if (!this._isOpen) {
+    if (!this._isOpen || this.isDisposed) {
       return;
     }
     this._isOpen = false;
@@ -150,6 +150,10 @@ export class PathNavigator extends Widget {
    * Fetch and display directory suggestions for the given input value.
    */
   private async _updateSuggestions(inputValue: string): Promise<void> {
+    if (!this._isOpen) {
+      return;
+    }
+
     const lastSlash = inputValue.lastIndexOf('/');
     const rawDirPart = lastSlash >= 0 ? inputValue.slice(0, lastSlash) : '';
     // Strip any leading slash — contents.get expects paths without a leading
@@ -169,9 +173,9 @@ export class PathNavigator extends Widget {
       const fetchId = ++this._fetchId;
       try {
         const contents = this._model.manager.services.contents;
-        const result = await contents.get(dirPart || '/', { content: true });
-        // Discard result if a newer fetch has started since this one was issued.
-        if (fetchId !== this._fetchId) {
+        const result = await contents.get(dirPart || '', { content: true });
+        // Discard result if a newer fetch has started or the widget was closed.
+        if (fetchId !== this._fetchId || !this._isOpen) {
           return;
         }
         this._suggestionFetchTime = Date.now();
