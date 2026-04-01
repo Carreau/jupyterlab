@@ -59,7 +59,7 @@ fi
 # Install and enable the server extension
 # Show a verbose install if the install fails, for debugging
 START=$(date +%s)
-pip install --system -v -e "${SPEC}"
+pip install -v -e "${SPEC}"
 step_time $START "uv pip install -e ${SPEC}"
 
 START=$(date +%s)
