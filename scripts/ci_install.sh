@@ -42,7 +42,7 @@ else
 fi
 
 # Show a verbose install if the install fails, for debugging
-pip install -e "${SPEC}" || pip install -v -e "${SPEC}"
+pip install -vvv -e "${SPEC}"
 
 node -p process.versions
 jlpm config
